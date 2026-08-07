@@ -437,7 +437,7 @@ function HomePage() {
           <div className="absolute -left-24 top-12 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
         </div>
-        <div className="container mx-auto grid gap-12 px-4 py-20 lg:grid-cols-[1.15fr_0.85fr] lg:items-end lg:py-28">
+        <div className="container mx-auto grid gap-10 px-4 py-20 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:py-24">
           <div className="max-w-3xl">
             <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Launching 11 March 2026
@@ -452,7 +452,7 @@ function HomePage() {
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-5">
               <a href="#register">
-                <Button size="lg" className="gradient-primary px-6 font-semibold text-primary-foreground shadow-[0_12px_32px_-14px_oklch(0.88_0.08_160_/_0.65)] transition-transform hover:-translate-y-0.5 active:translate-y-0">
+                <Button size="lg" className="gradient-primary px-7 font-semibold text-primary-foreground shadow-[0_14px_44px_-14px_rgb(0_229_255_/_0.75)] transition-transform hover:-translate-y-0.5 active:translate-y-0">
                   Register now
                 </Button>
               </a>
@@ -461,26 +461,13 @@ function HomePage() {
               </a>
             </div>
           </div>
-          <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:justify-self-end">
-            <div className="absolute -inset-px rounded-3xl bg-gradient-to-br from-primary/25 via-transparent to-primary/5" />
-            <div className="relative rounded-3xl border border-primary/15 bg-card/70 p-6 shadow-[0_28px_80px_-40px_oklch(0_0_0_/_0.9)] backdrop-blur-xl md:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Protocol snapshot</p>
-              <div className="mt-8 space-y-5">
-                {[
-                  ["Network", "BNB Smart Chain"],
-                  ["Liquidity", "PancakeSwap V3"],
-                  ["Architecture", "Non-custodial"],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex items-center justify-between border-b border-primary/10 pb-4 last:border-0 last:pb-0">
-                    <span className="text-sm text-muted-foreground">{label}</span>
-                    <span className="text-sm font-medium text-foreground">{value}</span>
-                  </div>
-                ))}
-              </div>
-              <p className="mt-8 border-t border-primary/10 pt-5 text-sm leading-6 text-muted-foreground">
-                Review the security system and plan details before participating.
-              </p>
-            </div>
+          <div className="relative mx-auto w-full max-w-3xl lg:-mr-10 lg:justify-self-end">
+            <div className="absolute inset-[15%] rounded-full bg-primary/25 blur-3xl" />
+            <img
+              src="/turbo-loop-network.png"
+              alt="TurboLoop ecosystem connecting Turbo Buy, Turbo Swap, Yield Farming, Referral Network, Leadership Program, and Smart Contract Security"
+              className="relative h-auto w-full scale-[1.08] drop-shadow-[0_0_34px_rgb(0_229_255_/_0.42)]"
+            />
           </div>
         </div>
       </section>
