@@ -73,29 +73,32 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TurboLoop - Earn on TurboLoop with Choexo" },
+      { title: "TurboLoop | BNB Smart Chain Ecosystem" },
       {
         name: "description",
-        content: "Decentralized liquidity aggregation protocol on BNB Smart Chain",
+        content: "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
       },
       { name: "author", content: "TurboLoop" },
-      { property: "og:title", content: "TurboLoop - Earn on TurboLoop with Choexo" },
+      { property: "og:site_name", content: "TurboLoop" },
+      { property: "og:locale", content: "en_US" },
+      { property: "og:title", content: "TurboLoop | BNB Smart Chain Ecosystem" },
       {
         property: "og:description",
-        content: "Decentralized liquidity aggregation protocol on BNB Smart Chain",
+        content: "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://turboport-redesigned.vercel.app/" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "TurboLoop - Earn on TurboLoop with Choexo" },
+      { name: "twitter:title", content: "TurboLoop | BNB Smart Chain Ecosystem" },
       {
         name: "twitter:description",
-        content: "Decentralized liquidity aggregation protocol on BNB Smart Chain",
+        content: "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
       },
+      { name: "twitter:domain", content: "turboport-redesigned.vercel.app" },
 
       {
         property: "og:image",
-        content: "https://turboport-redesigned.vercel.app/og-turboport.png",
+        content: "https://turboport-redesigned.vercel.app/og-turboport.png?v=20260808",
       },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
@@ -106,7 +109,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         name: "twitter:image",
-        content: "https://turboport-redesigned.vercel.app/og-turboport.png",
+        content: "https://turboport-redesigned.vercel.app/og-turboport.png?v=20260808",
       },
       {
         name: "twitter:image:alt",
@@ -114,6 +117,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
     ],
     links: [
+      { rel: "canonical", href: "https://turboport-redesigned.vercel.app/" },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon.ico" },
