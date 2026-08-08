@@ -447,7 +447,7 @@ function HomePage() {
             <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Launching 11 March 2026
             </p>
-            <h1 className="text-balance text-5xl font-semibold leading-[0.95] tracking-[-0.055em] md:text-7xl lg:text-8xl">
+            <h1 className="text-balance text-4xl font-semibold leading-[0.97] tracking-[-0.055em] sm:text-5xl md:text-6xl lg:text-7xl">
               Earn on <span className="text-gradient">TurboLoop</span>
               <br />
               with Choexo
@@ -469,7 +469,7 @@ function HomePage() {
           <div className="relative mx-auto w-full max-w-3xl lg:-mr-10 lg:justify-self-end">
             <div className="absolute inset-[15%] rounded-full bg-primary/25 blur-3xl" />
             <img
-              src="/turbo-loop-network.png"
+              src="/turbo-loop-network-v2.png"
               alt="TurboLoop ecosystem connecting Turbo Buy, Turbo Swap, Yield Farming, Referral Network, Leadership Program, and Smart Contract Security"
               className="relative h-auto w-full scale-[1.08] drop-shadow-[0_0_34px_rgb(0_229_255_/_0.42)]"
             />
