@@ -466,12 +466,12 @@ function HomePage() {
               </a>
             </div>
           </div>
-          <div className="relative mx-auto w-full max-w-3xl lg:-mr-10 lg:justify-self-end">
+          <div className="relative mx-auto w-full max-w-3xl lg:justify-self-end">
             <div className="absolute inset-[15%] rounded-full bg-primary/25 blur-3xl" />
             <img
               src="/turbo-loop-network-v2.png"
               alt="TurboLoop ecosystem connecting Turbo Buy, Turbo Swap, Yield Farming, Referral Network, Leadership Program, and Smart Contract Security"
-              className="relative h-auto w-full scale-[1.08] drop-shadow-[0_0_34px_rgb(0_229_255_/_0.42)]"
+              className="relative h-auto w-full drop-shadow-[0_0_34px_rgb(0_229_255_/_0.42)]"
             />
           </div>
         </div>
