@@ -444,7 +444,7 @@ function HomePage() {
           <div className="absolute -left-24 top-12 h-96 w-96 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute -right-24 bottom-0 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
         </div>
-        <div className="container mx-auto grid gap-10 px-4 py-20 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:py-24">
+        <div className="container mx-auto grid gap-10 px-5 py-20 sm:px-6 lg:pl-16 lg:grid-cols-[0.85fr_1.15fr] lg:items-center lg:py-24">
           <div className="max-w-3xl">
             <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Launching 11 March 2026
