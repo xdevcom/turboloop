@@ -434,7 +434,7 @@ function HomePage() {
     }
   };
 
-  const visibleMedia = seeAllMedia ? media : media.slice(0, 5);
+  const visibleMedia = seeAllMedia ? media : media.slice(0, 6);
 
   return (
     <PageShell>
@@ -1074,7 +1074,7 @@ function HomePage() {
             );
             const className = `relative overflow-hidden rounded-xl glass border-primary/15 aspect-square ${
               i === 0 ? "md:col-span-2 md:row-span-2 aspect-square md:aspect-auto" : ""
-            }`;
+            } ${!seeAllMedia && i === 5 ? "md:hidden" : ""}`;
             return m.type === "youtube" ? (
               <a
                 key={i}
