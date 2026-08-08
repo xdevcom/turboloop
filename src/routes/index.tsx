@@ -165,6 +165,11 @@ const AUDITS = [
     href: "https://hazecrypto.net/audit/TurboLoop",
   },
   {
+    title: "Audit Token Contract by HazeCrypto",
+    desc: "Thorough audit of token smart contracts by HazeCrypto",
+    href: "https://hazecrypto.net/audit/TurboToken",
+  },
+  {
     title: "SolidityScan Security Audit",
     desc: "Automated smart contract security scan by SolidityScan",
     href: "https://solidityscan.com/quickscan/0xc90E5785632dAaB9Cb61F5050dA393090541A76D/bscscan/mainnet",
@@ -588,7 +593,11 @@ function HomePage() {
                     <td className="px-6 py-4 whitespace-nowrap">{p.days} Days</td>
                     <td className="px-6 py-4 whitespace-nowrap">{p.daily}%</td>
                     <td className="px-6 py-4 whitespace-nowrap">{p.totalRoi}%</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{p.freeTurbo ? "Yes" : "No"}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={p.freeTurbo ? "font-semibold text-emerald-400" : "font-semibold text-red-400"}>
+                        {p.freeTurbo ? "Yes" : "No"}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -902,7 +911,7 @@ function HomePage() {
           ))}
         </div>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
           <a
             href="https://bscscan.com/address/0xc90E5785632dAaB9Cb61F5050dA393090541A76D#code"
             target="_blank"
@@ -910,14 +919,24 @@ function HomePage() {
           >
             <Button size="lg" className="gradient-primary text-primary-foreground font-semibold">
               <ShieldCheck className="mr-2 h-4 w-4" />
-              View Contract
+              View Main Contract
+            </Button>
+          </a>
+          <a
+            href="https://bscscan.com/token/0x64920E7f4f270f302e8b728f69B5a9Fc24Fda2D3#code"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button size="lg" variant="outline" className="border-primary/50 font-semibold">
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View Token Contract
             </Button>
           </a>
         </div>
 
         <div className="mt-14">
           <h3 className="text-xl font-semibold text-center">Independent Audits</h3>
-          <div className="mt-6 grid gap-5 md:grid-cols-2 max-w-3xl mx-auto">
+          <div className="mt-6 grid gap-5 md:grid-cols-3 max-w-5xl mx-auto">
             {AUDITS.map((a) => (
               <Card
                 key={a.title}
@@ -1034,8 +1053,7 @@ function HomePage() {
                     </span>
                   </span>
                 )}
-                <div className="absolute bottom-2 left-3 text-xs font-medium text-foreground/90 flex items-center gap-1.5">
-                  <Play className="h-3 w-3" />
+                <div className="absolute bottom-3 left-3 right-3 rounded-xl border border-primary/20 bg-background/80 px-3 py-2 text-xs font-semibold leading-4 text-foreground/95 backdrop-blur-md">
                   {m.alt}
                 </div>
               </>
