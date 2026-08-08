@@ -85,6 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content: "Decentralized liquidity aggregation protocol on BNB Smart Chain",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://turboport-redesigned.vercel.app/" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "TurboLoop - Earn on TurboLoop with Choexo" },
       {
@@ -94,13 +95,22 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
       {
         property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/220b3807-eb75-4c53-b413-785e228eb90a/id-preview-f3bcded3--ea26d169-f03f-4adf-b923-b65a1bb72a59.lovable.app-1783259597650.png",
+        content: "https://turboport-redesigned.vercel.app/og-turboport.png",
+      },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:type", content: "image/png" },
+      {
+        property: "og:image:alt",
+        content: "TurboLoop ecosystem on BNB Smart Chain",
       },
       {
         name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/220b3807-eb75-4c53-b413-785e228eb90a/id-preview-f3bcded3--ea26d169-f03f-4adf-b923-b65a1bb72a59.lovable.app-1783259597650.png",
+        content: "https://turboport-redesigned.vercel.app/og-turboport.png",
+      },
+      {
+        name: "twitter:image:alt",
+        content: "TurboLoop ecosystem on BNB Smart Chain",
       },
     ],
     links: [
