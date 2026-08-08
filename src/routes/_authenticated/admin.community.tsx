@@ -21,6 +21,7 @@ type MediaRow = {
   type: "image" | "youtube";
   url: string;
   alt: string;
+  storage_path: string | null;
   sort_order: number;
   created_at: string;
 };
@@ -43,6 +44,15 @@ function extractYoutubeId(input: string): string | null {
   return m ? m[1] : null;
 }
 
+function readAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read banner image"));
+    reader.readAsDataURL(file);
+  });
+}
+
 function AdminCommunity() {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -52,6 +62,7 @@ function AdminCommunity() {
   const [type, setType] = useState<"image" | "youtube">("image");
   const [url, setUrl] = useState("");
   const [alt, setAlt] = useState("");
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [sort, setSort] = useState("0");
   const [saving, setSaving] = useState(false);
 
@@ -74,7 +85,7 @@ function AdminCommunity() {
   const refresh = async () => {
     const { data, error } = await supabase
       .from("community_media")
-      .select("id, type, url, alt, sort_order, created_at")
+      .select("id, type, url, alt, storage_path, sort_order, created_at")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false });
     if (error) { toast.error(error.message); return; }
@@ -86,10 +97,16 @@ function AdminCommunity() {
     setSaving(true);
     try {
       let finalUrl = url.trim();
+      let customBanner: string | null = null;
       if (type === "youtube") {
         const id = extractYoutubeId(finalUrl);
         if (!id) throw new Error("Invalid YouTube URL or ID");
         finalUrl = id;
+        if (bannerFile) {
+          if (!bannerFile.type.startsWith("image/")) throw new Error("Banner must be an image file");
+          if (bannerFile.size > 500_000) throw new Error("Banner must be 500 KB or smaller");
+          customBanner = await readAsDataUrl(bannerFile);
+        }
       } else {
         if (!/^https?:\/\//i.test(finalUrl)) throw new Error("Image URL must start with http(s)://");
       }
@@ -97,11 +114,12 @@ function AdminCommunity() {
         type,
         url: finalUrl,
         alt: alt.trim(),
+        storage_path: customBanner,
         sort_order: Number(sort) || 0,
       });
       if (error) throw error;
       toast.success("Media added");
-      setUrl(""); setAlt(""); setSort("0");
+      setUrl(""); setAlt(""); setBannerFile(null); setSort("0");
       await refresh();
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Failed to add");
@@ -182,6 +200,21 @@ function AdminCommunity() {
                 placeholder={type === "image" ? "https://..." : "https://youtube.com/watch?v=..."}
               />
             </div>
+            {type === "youtube" && (
+              <div className="space-y-1.5">
+                <Label htmlFor="banner">Optional custom square banner</Label>
+                <Input
+                  key={bannerFile?.name ?? "default-banner"}
+                  id="banner"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(e) => setBannerFile(e.target.files?.[0] ?? null)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty to use the YouTube thumbnail. For the square card, use a 1:1 image up to 500 KB.
+                </p>
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label htmlFor="alt">Caption / alt text</Label>
               <Input id="alt" value={alt} onChange={(e) => setAlt(e.target.value)} placeholder="Community meetup" />
@@ -212,14 +245,14 @@ function AdminCommunity() {
                     {m.type === "image" ? (
                       <img src={m.url} alt={m.alt} loading="lazy" className="h-full w-full object-cover" />
                     ) : (
-                      <img src={`https://i.ytimg.com/vi/${m.url}/hqdefault.jpg`} alt={m.alt} loading="lazy" className="h-full w-full object-cover" />
+                      <img src={m.storage_path || `https://i.ytimg.com/vi/${m.url}/hqdefault.jpg`} alt={m.alt} loading="lazy" className="h-full w-full object-cover" />
                     )}
                     <span className="absolute top-1 left-1 rounded bg-background/80 px-1.5 py-0.5 text-[10px] uppercase font-bold">
                       {m.type}
                     </span>
                   </div>
                   <p className="text-xs truncate">{m.alt || <span className="text-muted-foreground italic">no caption</span>}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">Order: {m.sort_order}</p>
+                  <p className="text-[10px] text-muted-foreground truncate">Order: {m.sort_order}{m.type === "youtube" && m.storage_path ? " · custom banner" : ""}</p>
                   <Button variant="destructive" size="sm" className="w-full" onClick={() => onDelete(m.id)}>
                     <Trash2 className="h-3.5 w-3.5 mr-1" /> Delete
                   </Button>

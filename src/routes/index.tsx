@@ -297,7 +297,7 @@ const FAQ_CATEGORIES = [
   },
 ];
 
-type CommunityItem = { type: "image" | "youtube"; src: string; alt: string };
+type CommunityItem = { type: "image" | "youtube"; src: string; alt: string; banner?: string | null };
 
 const FALLBACK_COMMUNITY: CommunityItem[] = [
   { type: "image", src: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&w=1200&q=80", alt: "Community meetup" },
@@ -381,7 +381,7 @@ function HomePage() {
     let cancelled = false;
     supabase
       .from("community_media")
-      .select("type, url, alt")
+      .select("type, url, alt, storage_path")
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
       .then(({ data }) => {
@@ -391,6 +391,7 @@ function HomePage() {
             type: r.type as "image" | "youtube",
             src: r.url,
             alt: r.alt ?? "",
+            banner: r.storage_path,
           })),
         );
       });
@@ -1048,7 +1049,7 @@ function HomePage() {
 
         <div className="mt-10 grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {visibleMedia.map((m, i) => {
-            const imgSrc = m.type === "youtube" ? `https://i.ytimg.com/vi/${m.src}/hqdefault.jpg` : m.src;
+            const imgSrc = m.type === "youtube" ? m.banner || `https://i.ytimg.com/vi/${m.src}/hqdefault.jpg` : m.src;
             const inner = (
               <>
                 <img
