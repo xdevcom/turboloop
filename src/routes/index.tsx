@@ -447,7 +447,7 @@ function HomePage() {
             <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Launching 11 March 2026
             </p>
-            <h1 className="text-balance text-4xl font-semibold leading-[0.97] tracking-[-0.055em] sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="text-balance text-4xl font-semibold leading-[1.03] tracking-[-0.055em] sm:text-5xl md:text-6xl lg:text-7xl">
               Earn on <span className="text-gradient">TurboLoop</span>
               <br />
               with Choexo
