@@ -40,6 +40,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  Download,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -511,6 +512,18 @@ function HomePage() {
         </div>
         <div className="mt-10 max-w-4xl mx-auto">
           <YouTube id="e7Hyq6rr_F8" title="What is TurboLoop" />
+        </div>
+        <div className="mt-6 flex justify-center">
+          <a
+            href="https://www.dropbox.com/scl/fi/zu7pnfmgke4qwila4l7b8/TurboLoop-Presentation.pdf?rlkey=o5n52giytdca804hsx0gsmw3h&st=ct7cgdm9&dl=1"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Button size="lg" className="gradient-primary text-primary-foreground font-semibold">
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+          </a>
         </div>
       </section>
 
