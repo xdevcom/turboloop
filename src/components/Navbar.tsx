@@ -41,14 +41,20 @@ export function Navbar() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <a href={linkFor("#register")} className="hidden sm:inline-flex">
-            <Button className="gradient-primary text-primary-foreground font-semibold">
-              Register Now
-            </Button>
-          </a>
+          <Button
+            asChild
+            className="hidden gradient-primary text-primary-foreground font-semibold sm:inline-flex"
+          >
+            <a href={linkFor("#register")}>Register Now</a>
+          </Button>
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                aria-label="Open navigation menu"
+              >
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
@@ -67,15 +73,14 @@ export function Navbar() {
                     {n.label}
                   </a>
                 ))}
-                <a
-                  href={linkFor("#register")}
-                  onClick={() => setOpen(false)}
-                  className="mt-4"
+                <Button
+                  asChild
+                  className="mt-4 w-full gradient-primary text-primary-foreground font-semibold"
                 >
-                  <Button className="w-full gradient-primary text-primary-foreground font-semibold">
+                  <a href={linkFor("#register")} onClick={() => setOpen(false)}>
                     Register Now
-                  </Button>
-                </a>
+                  </a>
+                </Button>
               </div>
             </SheetContent>
           </Sheet>

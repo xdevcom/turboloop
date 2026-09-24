@@ -42,8 +42,7 @@ import {
   Check,
   Download,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
@@ -51,7 +50,14 @@ export const Route = createFileRoute("/")({
 
 const PLANS = [
   { id: "sprint", name: "Sprint Loop", days: 7, daily: 0.428, totalRoi: 3, freeTurbo: false },
-  { id: "accelerate", name: "Accelerate Loop", days: 14, daily: 0.714, totalRoi: 10, freeTurbo: false },
+  {
+    id: "accelerate",
+    name: "Accelerate Loop",
+    days: 14,
+    daily: 0.714,
+    totalRoi: 10,
+    freeTurbo: false,
+  },
   { id: "power", name: "Power Loop", days: 30, daily: 0.8, totalRoi: 24, freeTurbo: true },
   { id: "ultimate", name: "Ultimate Loop", days: 60, daily: 0.9, totalRoi: 54, freeTurbo: true },
 ];
@@ -179,6 +185,13 @@ const AUDITS = [
 
 const REGISTER_LINK = "https://turboloop.io?ref=Entrepreneur";
 
+const YOUTUBE_POSTERS: Record<string, string> = {
+  e7Hyq6rr_F8: "/youtube-e7Hyq6rr_F8.webp",
+  "8iD2dP-9wvc": "/youtube-8iD2dP-9wvc.webp",
+  naSg5kP1bsY: "/youtube-naSg5kP1bsY.webp",
+  qWhSoOSoXmU: "/youtube-qWhSoOSoXmU.webp",
+};
+
 const REGISTER_STEPS = [
   "Set up a crypto wallet (such as SafePal) that supports BNB Smart Chain",
   "Fund it with at least 1 USDT + a small amount of BNB for gas fees",
@@ -297,14 +310,19 @@ const FAQ_CATEGORIES = [
   },
 ];
 
-type CommunityItem = { type: "image" | "youtube"; src: string; alt: string; banner?: string | null };
+type CommunityItem = {
+  type: "image" | "youtube";
+  src: string;
+  alt: string;
+  banner?: string | null;
+};
 
 const FALLBACK_COMMUNITY: CommunityItem[] = [
-  { type: "image", src: "https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&w=1200&q=80", alt: "Community meetup" },
-  { type: "image", src: "https://images.unsplash.com/photo-1591115765373-5207764f72e4?auto=format&fit=crop&w=1200&q=80", alt: "Community event" },
-  { type: "image", src: "https://images.unsplash.com/photo-1591115765373-5207764f72e5?auto=format&fit=crop&w=1200&q=80", alt: "Community workshop" },
-  { type: "image", src: "https://images.unsplash.com/photo-1591115765373-5207764f72e6?auto=format&fit=crop&w=1200&q=80", alt: "Community gathering" },
-  { type: "image", src: "https://images.unsplash.com/photo-1591115765373-5207764f72e8?auto=format&fit=crop&w=1200&q=80", alt: "Community leaders" },
+  { type: "image", src: "/community-fallback-1.webp", alt: "Community meetup" },
+  { type: "image", src: "/community-fallback-2.webp", alt: "Community event" },
+  { type: "image", src: "/community-fallback-3.webp", alt: "Community workshop" },
+  { type: "image", src: "/community-fallback-4.webp", alt: "Community gathering" },
+  { type: "image", src: "/community-fallback-5.webp", alt: "Community leaders" },
 ];
 
 function YouTube({ id, title }: { id: string; title: string }) {
@@ -327,7 +345,7 @@ function YouTube({ id, title }: { id: string; title: string }) {
           className="absolute inset-0 h-full w-full group"
         >
           <img
-            src={`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
+            src={YOUTUBE_POSTERS[id] ?? `https://i.ytimg.com/vi/${id}/hqdefault.jpg`}
             alt={title}
             loading="lazy"
             decoding="async"
@@ -351,15 +369,9 @@ function FAQCategorySection({ cat }: { cat: (typeof FAQ_CATEGORIES)[0] }) {
       <Card className="glass border-primary/15 px-6">
         <Accordion type="single" collapsible className="w-full">
           {cat.items.map((item, idx) => (
-            <AccordionItem
-              key={idx}
-              value={`${cat.category}-${idx}`}
-              className="border-primary/10"
-            >
+            <AccordionItem key={idx} value={`${cat.category}-${idx}`} className="border-primary/10">
               <AccordionTrigger className="text-left">{item.q}</AccordionTrigger>
-              <AccordionContent className="text-muted-foreground">
-                {item.a}
-              </AccordionContent>
+              <AccordionContent className="text-muted-foreground">{item.a}</AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
@@ -376,27 +388,47 @@ function HomePage() {
   const [media, setMedia] = useState<CommunityItem[]>(FALLBACK_COMMUNITY);
   const [podcastApi, setPodcastApi] = useState<CarouselApi>();
   const [podcastIndex, setPodcastIndex] = useState(0);
+  const copyResetTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
-    supabase
-      .from("community_media")
-      .select("type, url, alt, storage_path")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
+    void import("@/integrations/supabase/client")
+      .then(({ supabase }) =>
+        supabase
+          .from("community_media")
+          .select("type, url, alt, storage_path")
+          .order("sort_order", { ascending: true })
+          .order("created_at", { ascending: false }),
+      )
+      .then(({ data, error }) => {
+        if (error) throw error;
         if (cancelled || !data || data.length === 0) return;
         setMedia(
-          data.map((r) => ({
-            type: r.type as "image" | "youtube",
-            src: r.url,
-            alt: r.alt ?? "",
-            banner: r.storage_path,
+          data.map((row) => ({
+            type: row.type,
+            src: row.url,
+            alt: row.alt ?? "",
+            banner: row.storage_path,
           })),
         );
+      })
+      .catch((error) => {
+        if (!cancelled && import.meta.env.DEV) {
+          console.warn("Unable to load community media; using local fallbacks.", error);
+        }
       });
-    return () => { cancelled = true; };
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(
+    () => () => {
+      if (copyResetTimer.current) clearTimeout(copyResetTimer.current);
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!podcastApi) return;
@@ -405,13 +437,12 @@ function HomePage() {
     };
     onSelect(podcastApi);
     podcastApi.on("select", onSelect);
-    return () => { podcastApi.off("select", onSelect); };
+    return () => {
+      podcastApi.off("select", onSelect);
+    };
   }, [podcastApi]);
 
-  const selectedPlan = useMemo(
-    () => PLANS.find((p) => p.id === planId) ?? PLANS[0],
-    [planId],
-  );
+  const selectedPlan = useMemo(() => PLANS.find((p) => p.id === planId) ?? PLANS[0], [planId]);
   const totalProfit = useMemo(() => {
     const a = Number(amount);
     if (!Number.isFinite(a) || a <= 0) return 0;
@@ -428,7 +459,8 @@ function HomePage() {
     try {
       await navigator.clipboard.writeText(REGISTER_LINK);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
+      if (copyResetTimer.current) clearTimeout(copyResetTimer.current);
+      copyResetTimer.current = setTimeout(() => setCopied(false), 1800);
     } catch {
       /* noop */
     }
@@ -455,15 +487,21 @@ function HomePage() {
               with Choexo
             </h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-muted-foreground md:text-xl">
-              A decentralized liquidity aggregation protocol powered by PancakeSwap V3 on BNB Smart Chain.
+              A decentralized liquidity aggregation protocol powered by PancakeSwap V3 on BNB Smart
+              Chain.
             </p>
             <div className="mt-9 flex flex-wrap items-center gap-5">
-              <a href="#register">
-                <Button size="lg" className="gradient-primary px-7 font-semibold text-primary-foreground shadow-[0_14px_44px_-14px_rgb(0_229_255_/_0.75)] transition-transform hover:-translate-y-0.5 active:translate-y-0">
-                  Register now
-                </Button>
-              </a>
-              <a href="#security" className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline">
+              <Button
+                asChild
+                size="lg"
+                className="gradient-primary px-7 font-semibold text-primary-foreground shadow-[0_14px_44px_-14px_rgb(0_229_255_/_0.75)] transition-transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <a href="#register">Register now</a>
+              </Button>
+              <a
+                href="#security"
+                className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+              >
                 Explore the protocol
               </a>
             </div>
@@ -471,8 +509,14 @@ function HomePage() {
           <div className="relative mx-auto w-full max-w-3xl lg:justify-self-end">
             <div className="absolute inset-[15%] rounded-full bg-primary/25 blur-3xl" />
             <img
-              src="/turbo-loop-network-v2.webp"
+              src="/turbo-loop-network-v2-768.webp"
+              srcSet="/turbo-loop-network-v2-768.webp 768w, /turbo-loop-network-v2.webp 1536w"
+              sizes="(min-width: 1024px) 58vw, 100vw"
               alt="TurboLoop ecosystem connecting Turbo Buy, Turbo Swap, Yield Farming, Referral Network, Leadership Program, and Smart Contract Security"
+              width="1536"
+              height="1024"
+              fetchPriority="high"
+              decoding="async"
               className="relative h-auto w-full drop-shadow-[0_0_34px_rgb(0_229_255_/_0.42)]"
             />
           </div>
@@ -481,13 +525,16 @@ function HomePage() {
 
       {/* MARQUEE */}
       <section className="border-y border-primary/10 bg-card/40 py-4 overflow-hidden">
-          <div className="flex animate-marquee whitespace-nowrap hover:[animation-play-state:paused]">
+        <div className="flex animate-marquee whitespace-nowrap hover:[animation-play-state:paused]">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="flex items-center gap-12 px-6 text-sm font-semibold">
               {PLANS.map((p) => (
                 <span key={p.id} className="flex items-center gap-2 text-foreground">
                   <Zap className="h-4 w-4 text-primary" />
-                  {p.name} <span className="text-primary">• {p.days} Days • {p.totalRoi}% ROI</span>
+                  {p.name}{" "}
+                  <span className="text-primary">
+                    • {p.days} Days • {p.totalRoi}% ROI
+                  </span>
                 </span>
               ))}
             </div>
@@ -502,29 +549,32 @@ function HomePage() {
             What is <span className="text-gradient">TurboLoop</span>
           </h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            TurboLoop is a next-generation decentralized liquidity aggregation
-            protocol that synergizes automated PancakeSwap V3 market-making with
-            a sophisticated, multi-tiered network compensation architecture. By
-            dynamically deploying USDT into active decentralized exchange
-            liquidity pools, TurboLoop generates sustainable, market-driven
-            yields, which are then algorithmically distributed through a highly
-            structured, rank-based affiliate matrix.
+            TurboLoop is a next-generation decentralized liquidity aggregation protocol that
+            synergizes automated PancakeSwap V3 market-making with a sophisticated, multi-tiered
+            network compensation architecture. By dynamically deploying USDT into active
+            decentralized exchange liquidity pools, TurboLoop generates sustainable, market-driven
+            yields, which are then algorithmically distributed through a highly structured,
+            rank-based affiliate matrix.
           </p>
         </div>
         <div className="mt-10 max-w-4xl mx-auto">
           <YouTube id="e7Hyq6rr_F8" title="What is TurboLoop" />
         </div>
         <div className="mt-6 flex justify-center">
-          <a
-            href="https://www.dropbox.com/scl/fi/zu7pnfmgke4qwila4l7b8/TurboLoop-Presentation.pdf?rlkey=o5n52giytdca804hsx0gsmw3h&st=ct7cgdm9&dl=1"
-            target="_blank"
-            rel="noreferrer"
+          <Button
+            asChild
+            size="lg"
+            className="gradient-primary text-primary-foreground font-semibold"
           >
-            <Button size="lg" className="gradient-primary text-primary-foreground font-semibold">
+            <a
+              href="https://www.dropbox.com/scl/fi/zu7pnfmgke4qwila4l7b8/TurboLoop-Presentation.pdf?rlkey=o5n52giytdca804hsx0gsmw3h&st=ct7cgdm9&dl=1"
+              target="_blank"
+              rel="noreferrer"
+            >
               <Download className="mr-2 h-4 w-4" />
               Download PDF
-            </Button>
-          </a>
+            </a>
+          </Button>
         </div>
       </section>
 
@@ -532,10 +582,12 @@ function HomePage() {
       <section id="podcast" className="container mx-auto px-4 py-20 scroll-mt-16">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold">
-            Exclusive Podcast with <span className="text-gradient">David (CEO & Global Ambassador)</span>
+            Exclusive Podcast with{" "}
+            <span className="text-gradient">David (CEO & Global Ambassador)</span>
           </h2>
           <p className="mt-4 text-muted-foreground leading-relaxed">
-            A 20-Minute Breakdown Covering Security Audits, Smart Contract Architecture and How Your USDT Earns a Fixed Return on the BNB Smart Chain
+            A 20-Minute Breakdown Covering Security Audits, Smart Contract Architecture and How Your
+            USDT Earns a Fixed Return on the BNB Smart Chain
           </p>
         </div>
         <div className="mt-10 max-w-4xl mx-auto">
@@ -587,28 +639,51 @@ function HomePage() {
           </p>
         </div>
 
-
-        <div className="mt-10 overflow-x-auto no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'block' }}>
-          <div className="glass rounded-2xl overflow-hidden" style={{ minWidth: '720px', width: '100%' }}>
+        <div
+          className="mt-10 overflow-x-auto no-scrollbar"
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", display: "block" }}
+        >
+          <div
+            className="glass rounded-2xl overflow-hidden"
+            style={{ minWidth: "720px", width: "100%" }}
+          >
             <table className="w-full text-sm">
               <thead className="bg-primary/5 text-foreground">
                 <tr>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Plan</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Duration</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Daily Estimate</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Total ROI</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Free Turbo Tokens</th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Plan
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Duration
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Daily Estimate
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Total ROI
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Free Turbo Tokens
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {PLANS.map((p) => (
                   <tr key={p.id} className="border-t border-primary/10">
-                    <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">{p.name}</td>
+                    <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">
+                      {p.name}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">{p.days} Days</td>
                     <td className="px-6 py-4 whitespace-nowrap">{p.daily}%</td>
                     <td className="px-6 py-4 whitespace-nowrap">{p.totalRoi}%</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={p.freeTurbo ? "font-semibold text-emerald-400" : "font-semibold text-red-400"}>
+                      <span
+                        className={
+                          p.freeTurbo
+                            ? "font-semibold text-emerald-400"
+                            : "font-semibold text-red-400"
+                        }
+                      >
                         {p.freeTurbo ? "Yes" : "No"}
                       </span>
                     </td>
@@ -627,8 +702,8 @@ function HomePage() {
             Calculate Your <span className="text-gradient">Potential Return</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Enter Your Deposit Amount, Select a Loop Plan and Preview Your
-            Estimated Total Return Before Depositing
+            Enter Your Deposit Amount, Select a Loop Plan and Preview Your Estimated Total Return
+            Before Depositing
           </p>
         </div>
 
@@ -669,17 +744,13 @@ function HomePage() {
 
           <div className="mt-8 grid gap-4 sm:grid-cols-2">
             <div className="glass rounded-xl p-5 text-center">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                Total Profit
-              </p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Total Profit</p>
               <p className="mt-2 text-2xl font-bold text-primary">
                 {totalProfit.toLocaleString("en-US", { maximumFractionDigits: 2 })} USDT
               </p>
             </div>
             <div className="glass rounded-xl p-5 text-center">
-              <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                Total Return
-              </p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Total Return</p>
               <p className="mt-2 text-2xl font-bold text-gradient">
                 {totalReturn.toLocaleString("en-US", { maximumFractionDigits: 2 })} USDT
               </p>
@@ -695,26 +766,42 @@ function HomePage() {
             Build Your Network Across <span className="text-gradient">20 Referral Levels</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Invite Users, Grow Your Active Network and Unlock Commission Levels
-            Based on Your Own Active Deposit and Active Direct Referrals
+            Invite Users, Grow Your Active Network and Unlock Commission Levels Based on Your Own
+            Active Deposit and Active Direct Referrals
           </p>
         </div>
 
-        <div className="mt-10 overflow-x-auto no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'block' }}>
-          <div className="glass rounded-2xl overflow-hidden" style={{ minWidth: '720px', width: '100%' }}>
+        <div
+          className="mt-10 overflow-x-auto no-scrollbar"
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", display: "block" }}
+        >
+          <div
+            className="glass rounded-2xl overflow-hidden"
+            style={{ minWidth: "720px", width: "100%" }}
+          >
             <table className="w-full text-sm">
               <thead className="bg-primary/5 text-foreground">
                 <tr>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Level</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Requirement</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Commission</th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Level
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Requirement
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Commission
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {REFERRAL_LEVELS.map((row) => (
                   <tr key={row.level} className="border-t border-primary/10">
-                    <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">{row.level}</td>
-                    <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">{row.requirement}</td>
+                    <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">
+                      {row.level}
+                    </td>
+                    <td className="px-6 py-4 text-muted-foreground whitespace-nowrap">
+                      {row.requirement}
+                    </td>
                     <td className="px-6 py-4 font-semibold whitespace-nowrap">{row.commission}</td>
                   </tr>
                 ))}
@@ -724,8 +811,8 @@ function HomePage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground max-w-2xl mx-auto">
-          Note: 20-level referral bonus is calculated from a fraction of your
-          downline's daily ROI, not from their deposit amount
+          Note: 20-level referral bonus is calculated from a fraction of your downline's daily ROI,
+          not from their deposit amount
         </p>
       </section>
 
@@ -736,20 +823,33 @@ function HomePage() {
             Earn <span className="text-gradient">Leadership Ranks</span> as Your Team Grows
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Each Rank Unlocks Different Reward Percentages and Additional Status
-            Within the Platform
+            Each Rank Unlocks Different Reward Percentages and Additional Status Within the Platform
           </p>
         </div>
 
-        <div className="mt-10 overflow-x-auto no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'block' }}>
-          <div className="glass rounded-2xl overflow-hidden" style={{ minWidth: '720px', width: '100%' }}>
+        <div
+          className="mt-10 overflow-x-auto no-scrollbar"
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", display: "block" }}
+        >
+          <div
+            className="glass rounded-2xl overflow-hidden"
+            style={{ minWidth: "720px", width: "100%" }}
+          >
             <table className="w-full text-sm">
               <thead className="bg-primary/5 text-foreground">
                 <tr>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Rank</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Team Size</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Team Deposit</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Reward</th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Rank
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Team Size
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Team Deposit
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Reward
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -781,25 +881,37 @@ function HomePage() {
             Unlock Instant <span className="text-gradient">Onboarding Bonuses</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Earn an Onboarding Bonus When Your Referrals Make an Initial
-            Placement into a 30-Day or 60-Day Liquidity Plan
+            Earn an Onboarding Bonus When Your Referrals Make an Initial Placement into a 30-Day or
+            60-Day Liquidity Plan
           </p>
         </div>
 
-        <div className="mt-10 overflow-x-auto no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'block' }}>
-          <div className="max-w-2xl mx-auto glass rounded-2xl overflow-hidden" style={{ minWidth: '520px', width: '100%' }}>
+        <div
+          className="mt-10 overflow-x-auto no-scrollbar"
+          style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", display: "block" }}
+        >
+          <div
+            className="max-w-2xl mx-auto glass rounded-2xl overflow-hidden"
+            style={{ minWidth: "520px", width: "100%" }}
+          >
             <table className="w-full text-sm">
               <thead className="bg-primary/5 text-foreground">
                 <tr>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Deposit Range</th>
-                  <th className="px-6 py-4 text-left whitespace-nowrap">Bonus</th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Deposit Range
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                    Bonus
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {ONBOARDING_BONUS.map((row) => (
                   <tr key={row.range} className="border-t border-primary/10">
                     <td className="px-6 py-4 whitespace-nowrap">{row.range}</td>
-                    <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">{row.bonus}</td>
+                    <td className="px-6 py-4 font-semibold text-primary whitespace-nowrap">
+                      {row.bonus}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -815,8 +927,8 @@ function HomePage() {
             Earn Additional <span className="text-gradient">$Turbo Rewards</span> Automatically
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Power and Ultimate Package Users can Receive Additional $Turbo Rewards
-            on Top of Their Fixed Package Returns
+            Power and Ultimate Package Users can Receive Additional $Turbo Rewards on Top of Their
+            Fixed Package Returns
           </p>
         </div>
 
@@ -828,9 +940,7 @@ function HomePage() {
               </div>
               <div>
                 <h3 className="font-bold text-sm mb-1">{step.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  {step.desc}
-                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{step.desc}</p>
               </div>
             </Card>
           ))}
@@ -841,15 +951,29 @@ function HomePage() {
             <h3 className="text-xl font-semibold text-center mb-6">
               Additional Reward Allocation by Deposit Size
             </h3>
-            <div className="mt-10 overflow-x-auto no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'block' }}>
-              <div className="glass rounded-2xl overflow-hidden" style={{ minWidth: '720px', width: '100%' }}>
+            <div
+              className="mt-10 overflow-x-auto no-scrollbar"
+              style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", display: "block" }}
+            >
+              <div
+                className="glass rounded-2xl overflow-hidden"
+                style={{ minWidth: "720px", width: "100%" }}
+              >
                 <table className="w-full text-sm">
                   <thead className="bg-primary/5 text-foreground">
                     <tr>
-                      <th className="px-6 py-4 text-left whitespace-nowrap">Deposit Range</th>
-                      <th className="px-6 py-4 text-left whitespace-nowrap">Total</th>
-                      <th className="px-6 py-4 text-left whitespace-nowrap">User</th>
-                      <th className="px-6 py-4 text-left whitespace-nowrap">Upline</th>
+                      <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                        Deposit Range
+                      </th>
+                      <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                        Total
+                      </th>
+                      <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                        User
+                      </th>
+                      <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                        Upline
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -870,16 +994,24 @@ function HomePage() {
           </div>
 
           <div>
-            <h3 className="text-xl font-semibold text-center mb-6">
-              Monthly Vesting by Rank
-            </h3>
-            <div className="mt-10 overflow-x-auto no-scrollbar" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', display: 'block' }}>
-              <div className="max-w-2xl mx-auto glass rounded-2xl overflow-hidden" style={{ minWidth: '520px', width: '100%' }}>
+            <h3 className="text-xl font-semibold text-center mb-6">Monthly Vesting by Rank</h3>
+            <div
+              className="mt-10 overflow-x-auto no-scrollbar"
+              style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", display: "block" }}
+            >
+              <div
+                className="max-w-2xl mx-auto glass rounded-2xl overflow-hidden"
+                style={{ minWidth: "520px", width: "100%" }}
+              >
                 <table className="w-full text-sm">
                   <thead className="bg-primary/5 text-foreground">
                     <tr>
-                      <th className="px-6 py-4 text-left whitespace-nowrap">Rank</th>
-                      <th className="px-6 py-4 text-left whitespace-nowrap">Monthly Vesting</th>
+                      <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                        Rank
+                      </th>
+                      <th scope="col" className="px-6 py-4 text-left whitespace-nowrap">
+                        Monthly Vesting
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -926,26 +1058,30 @@ function HomePage() {
         </div>
 
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a
-            href="https://bscscan.com/address/0xc90E5785632dAaB9Cb61F5050dA393090541A76D#code"
-            target="_blank"
-            rel="noreferrer"
+          <Button
+            asChild
+            size="lg"
+            className="gradient-primary text-primary-foreground font-semibold"
           >
-            <Button size="lg" className="gradient-primary text-primary-foreground font-semibold">
+            <a
+              href="https://bscscan.com/address/0xc90E5785632dAaB9Cb61F5050dA393090541A76D#code"
+              target="_blank"
+              rel="noreferrer"
+            >
               <ShieldCheck className="mr-2 h-4 w-4" />
               View Main Contract
-            </Button>
-          </a>
-          <a
-            href="https://bscscan.com/token/0x64920E7f4f270f302e8b728f69B5a9Fc24Fda2D3#code"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <Button size="lg" variant="outline" className="border-primary/50 font-semibold">
+            </a>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="border-primary/50 font-semibold">
+            <a
+              href="https://bscscan.com/token/0x64920E7f4f270f302e8b728f69B5a9Fc24Fda2D3#code"
+              target="_blank"
+              rel="noreferrer"
+            >
               <ExternalLink className="mr-2 h-4 w-4" />
               View Token Contract
-            </Button>
-          </a>
+            </a>
+          </Button>
         </div>
 
         <div className="mt-14">
@@ -963,12 +1099,12 @@ function HomePage() {
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">{a.desc}</p>
                 </div>
-                <a href={a.href} target="_blank" rel="noreferrer" className="mt-5">
-                  <Button variant="outline" className="w-full border-primary/40">
+                <Button asChild variant="outline" className="mt-5 w-full border-primary/40">
+                  <a href={a.href} target="_blank" rel="noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     View Report
-                  </Button>
-                </a>
+                  </a>
+                </Button>
               </Card>
             ))}
           </div>
@@ -988,8 +1124,6 @@ function HomePage() {
           <div className="w-full max-w-4xl mx-auto">
             <YouTube id="qWhSoOSoXmU" title="How to Register on TurboLoop" />
           </div>
-
-
 
           <ol className="space-y-4">
             {REGISTER_STEPS.map((step, i) => {
@@ -1033,7 +1167,6 @@ function HomePage() {
             })}
           </ol>
         </div>
-
       </section>
 
       {/* ================= COMMUNITY EVENT ================= */}
@@ -1049,7 +1182,10 @@ function HomePage() {
 
         <div className="mt-10 grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {visibleMedia.map((m, i) => {
-            const imgSrc = m.type === "youtube" ? m.banner || `https://i.ytimg.com/vi/${m.src}/hqdefault.jpg` : m.src;
+            const imgSrc =
+              m.type === "youtube"
+                ? m.banner || `https://i.ytimg.com/vi/${m.src}/hqdefault.jpg`
+                : m.src;
             const inner = (
               <>
                 <img
@@ -1086,7 +1222,9 @@ function HomePage() {
                 {inner}
               </a>
             ) : (
-              <div key={i} className={className}>{inner}</div>
+              <div key={i} className={className}>
+                {inner}
+              </div>
             );
           })}
         </div>
@@ -1129,8 +1267,7 @@ function HomePage() {
             Community and <span className="text-gradient">Support</span>
           </h2>
           <p className="mt-3 text-muted-foreground">
-            Stay Connected with Our Community and Access the Support You Need
-            Every Step of the Way
+            Stay Connected with Our Community and Access the Support You Need Every Step of the Way
           </p>
         </div>
 
@@ -1167,11 +1304,14 @@ function HomePage() {
               </div>
               <h3 className="mt-4 font-semibold text-lg">{title}</h3>
               <p className="mt-2 text-sm text-muted-foreground flex-1">{desc}</p>
-              <a href={href} target="_blank" rel="noreferrer" className="mt-5">
-                <Button className="w-full gradient-primary text-primary-foreground font-semibold">
+              <Button
+                asChild
+                className="mt-5 w-full gradient-primary text-primary-foreground font-semibold"
+              >
+                <a href={href} target="_blank" rel="noreferrer">
                   {cta}
-                </Button>
-              </a>
+                </a>
+              </Button>
             </Card>
           ))}
         </div>

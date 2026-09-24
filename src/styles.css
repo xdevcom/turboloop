@@ -2,6 +2,14 @@
 @source "../src";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: "Outfit";
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url("/outfit-latin.woff2") format("woff2");
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -135,6 +143,10 @@
       animation-iteration-count: 1 !important;
       scroll-behavior: auto !important;
       transition-duration: 0.01ms !important;
+    }
+    .animate-marquee {
+      animation: none !important;
+      transform: none !important;
     }
   }
 }

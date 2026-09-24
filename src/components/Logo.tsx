@@ -2,7 +2,8 @@ export function Logo({ size = 36, withText = true }: { size?: number; withText?:
   return (
     <div className="flex items-center gap-2.5">
       <img
-        src="/logo.png"
+        src="/logo-72.webp"
+        srcSet="/logo-72.webp 1x, /logo-144.webp 2x"
         alt="TurboLoop"
         width={size}
         height={size}
@@ -18,4 +19,3 @@ export function Logo({ size = 36, withText = true }: { size?: number; withText?:
     </div>
   );
 }
-

@@ -1,17 +1,20 @@
-import { QueryClient } from "@tanstack/react-query";
 import {
   Outlet,
   Link,
-  createRootRouteWithContext,
+  createRootRoute,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { Toaster } from "@/components/ui/sonner";
+
+const Toaster = lazy(() =>
+  import("@/components/ui/sonner").then(({ Toaster: Component }) => ({ default: Component })),
+);
 
 function NotFoundComponent() {
   return (
@@ -68,7 +71,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   );
 }
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -76,15 +79,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "TurboLoop | BNB Smart Chain Ecosystem" },
       {
         name: "description",
-        content: "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
+        content:
+          "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
       },
       { name: "author", content: "TurboLoop" },
+      { name: "theme-color", content: "#000000" },
+      { name: "msapplication-TileColor", content: "#000000" },
       { property: "og:site_name", content: "TurboLoop" },
       { property: "og:locale", content: "en_US" },
       { property: "og:title", content: "TurboLoop | BNB Smart Chain Ecosystem" },
       {
         property: "og:description",
-        content: "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
+        content:
+          "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://turboport-redesigned.vercel.app/" },
@@ -92,7 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:title", content: "TurboLoop | BNB Smart Chain Ecosystem" },
       {
         name: "twitter:description",
-        content: "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
+        content:
+          "Explore TurboLoop's BNB Smart Chain ecosystem: Turbo Buy, Swap, Yield Farming, Referral Network, Leadership, and Smart Contract Security.",
       },
       { name: "twitter:domain", content: "turboport-redesigned.vercel.app" },
 
@@ -125,13 +133,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "256x256", href: "/favicon-256.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
       { rel: "manifest", href: "/manifest.json" },
-      { name: "theme-color", content: "#000000" },
-      { name: "msapplication-TileColor", content: "#000000" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap",
+        rel: "preload",
+        href: "/outfit-latin.woff2",
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
       },
     ],
   }),
@@ -156,10 +163,16 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  const showToaster = useRouterState({ select: (state) => state.location.pathname !== "/" });
+
   return (
     <>
       <Outlet />
-      <Toaster position="top-right" richColors theme="dark" />
+      {showToaster && (
+        <Suspense fallback={null}>
+          <Toaster position="top-right" richColors theme="dark" />
+        </Suspense>
+      )}
     </>
   );
 }
