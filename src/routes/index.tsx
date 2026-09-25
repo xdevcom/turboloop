@@ -53,6 +53,7 @@ export const Route = createFileRoute("/")({
         as: "image",
         type: "image/avif",
         media: "(max-width: 767px)",
+        fetchPriority: "high",
       },
       {
         rel: "preload",
@@ -60,6 +61,7 @@ export const Route = createFileRoute("/")({
         as: "image",
         type: "image/webp",
         media: "(min-width: 768px)",
+        fetchPriority: "high",
       },
     ],
   }),
