@@ -49,9 +49,9 @@ export const Route = createFileRoute("/")({
     links: [
       {
         rel: "preload",
-        href: "/turbo-loop-network-v2-640.webp",
+        href: "/turbo-loop-network-v2-640.avif",
         as: "image",
-        type: "image/webp",
+        type: "image/avif",
         media: "(max-width: 767px)",
       },
       {
@@ -527,6 +527,11 @@ function HomePage() {
           <div className="relative mx-auto w-full max-w-3xl lg:justify-self-end">
             <div className="absolute inset-[15%] rounded-full bg-primary/25 blur-3xl" />
             <picture>
+              <source
+                type="image/avif"
+                media="(max-width: 767px)"
+                srcSet="/turbo-loop-network-v2-640.avif"
+              />
               <source
                 media="(max-width: 767px)"
                 srcSet="/turbo-loop-network-v2-480.webp 480w, /turbo-loop-network-v2-640.webp 640w"
