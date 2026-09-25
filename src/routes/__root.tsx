@@ -126,6 +126,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "canonical", href: "https://turboport-redesigned.vercel.app/" },
+      { rel: "preload", href: appCss, as: "style", fetchPriority: "high" },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon.ico" },

@@ -186,7 +186,7 @@ const AUDITS = [
 const REGISTER_LINK = "https://turboloop.io?ref=Entrepreneur";
 
 const YOUTUBE_POSTERS: Record<string, string> = {
-  e7Hyq6rr_F8: "/youtube-e7Hyq6rr_F8.webp",
+  e7Hyq6rr_F8: "/youtube-e7Hyq6rr_F8-480.webp",
   "8iD2dP-9wvc": "/youtube-8iD2dP-9wvc.webp",
   naSg5kP1bsY: "/youtube-naSg5kP1bsY.webp",
   qWhSoOSoXmU: "/youtube-qWhSoOSoXmU.webp",
@@ -509,9 +509,9 @@ function HomePage() {
           <div className="relative mx-auto w-full max-w-3xl lg:justify-self-end">
             <div className="absolute inset-[15%] rounded-full bg-primary/25 blur-3xl" />
             <img
-              src="/turbo-loop-network-v2-768.webp"
-              srcSet="/turbo-loop-network-v2-768.webp 768w, /turbo-loop-network-v2.webp 1536w"
-              sizes="(min-width: 1024px) 58vw, 100vw"
+              src="/turbo-loop-network-v2-1024.webp"
+              srcSet="/turbo-loop-network-v2-480.webp 480w, /turbo-loop-network-v2-768.webp 768w, /turbo-loop-network-v2-1024.webp 1024w"
+              sizes="(min-width: 1280px) 52vw, (min-width: 1024px) 58vw, 100vw"
               alt="TurboLoop ecosystem connecting Turbo Buy, Turbo Swap, Yield Farming, Referral Network, Leadership Program, and Smart Contract Security"
               width="1536"
               height="1024"
