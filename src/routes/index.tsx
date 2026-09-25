@@ -54,6 +54,8 @@ export const Route = createFileRoute("/")({
         type: "image/avif",
         media: "(max-width: 767px)",
         fetchPriority: "high",
+        imageSrcSet: "/turbo-loop-network-v2-640.avif",
+        imageSizes: "100vw",
       },
       {
         rel: "preload",
@@ -62,6 +64,8 @@ export const Route = createFileRoute("/")({
         type: "image/webp",
         media: "(min-width: 768px)",
         fetchPriority: "high",
+        imageSrcSet: "/turbo-loop-network-v2-768.webp 768w, /turbo-loop-network-v2-1024.webp 1024w",
+        imageSizes: "(min-width: 1280px) 52vw, 58vw",
       },
     ],
   }),
