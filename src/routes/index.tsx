@@ -45,6 +45,24 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    links: [
+      {
+        rel: "preload",
+        href: "/turbo-loop-network-v2-640.webp",
+        as: "image",
+        type: "image/webp",
+        media: "(max-width: 767px)",
+      },
+      {
+        rel: "preload",
+        href: "/turbo-loop-network-v2-768.webp",
+        as: "image",
+        type: "image/webp",
+        media: "(min-width: 768px)",
+      },
+    ],
+  }),
   component: HomePage,
 });
 
@@ -508,17 +526,24 @@ function HomePage() {
           </div>
           <div className="relative mx-auto w-full max-w-3xl lg:justify-self-end">
             <div className="absolute inset-[15%] rounded-full bg-primary/25 blur-3xl" />
-            <img
-              src="/turbo-loop-network-v2-1024.webp"
-              srcSet="/turbo-loop-network-v2-480.webp 480w, /turbo-loop-network-v2-768.webp 768w, /turbo-loop-network-v2-1024.webp 1024w"
-              sizes="(min-width: 1280px) 52vw, (min-width: 1024px) 58vw, 100vw"
-              alt="TurboLoop ecosystem connecting Turbo Buy, Turbo Swap, Yield Farming, Referral Network, Leadership Program, and Smart Contract Security"
-              width="1536"
-              height="1024"
-              fetchPriority="high"
-              decoding="async"
-              className="relative h-auto w-full drop-shadow-[0_0_34px_rgb(0_229_255_/_0.42)]"
-            />
+            <picture>
+              <source
+                media="(max-width: 767px)"
+                srcSet="/turbo-loop-network-v2-480.webp 480w, /turbo-loop-network-v2-640.webp 640w"
+                sizes="100vw"
+              />
+              <img
+                src="/turbo-loop-network-v2-1024.webp"
+                srcSet="/turbo-loop-network-v2-768.webp 768w, /turbo-loop-network-v2-1024.webp 1024w"
+                sizes="(min-width: 1280px) 52vw, 58vw"
+                alt="TurboLoop ecosystem connecting Turbo Buy, Turbo Swap, Yield Farming, Referral Network, Leadership Program, and Smart Contract Security"
+                width="1536"
+                height="1024"
+                fetchPriority="high"
+                decoding="async"
+                className="relative h-auto w-full drop-shadow-[0_0_34px_rgb(0_229_255_/_0.42)]"
+              />
+            </picture>
           </div>
         </div>
       </section>
