@@ -1,5 +1,6 @@
 // Integration-managed protected layout: gates /_authenticated/* behind Supabase auth.
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -7,11 +8,21 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     try {
       const { data, error } = await supabase.auth.getUser();
-      if (error || !data.user) throw redirect({ to: "/auth" });
-      return { user: data.user };
+      return { user: error ? null : data.user };
     } catch {
-      throw redirect({ to: "/auth" });
+      return { user: null };
     }
   },
-  component: () => <Outlet />,
+  component: AuthenticatedLayout,
 });
+
+function AuthenticatedLayout() {
+  const navigate = useNavigate();
+  const { user } = Route.useRouteContext();
+
+  useEffect(() => {
+    if (!user) void navigate({ to: "/auth", replace: true });
+  }, [navigate, user]);
+
+  return user ? <Outlet /> : null;
+}

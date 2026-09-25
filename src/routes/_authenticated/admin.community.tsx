@@ -55,7 +55,7 @@ function readAsDataUrl(file: File) {
 
 function AdminCommunity() {
   const navigate = useNavigate();
-  const { user } = Route.useRouteContext();
+  const user = Route.useRouteContext().user!;
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [rows, setRows] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
